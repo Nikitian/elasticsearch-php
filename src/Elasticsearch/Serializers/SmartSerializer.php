@@ -35,17 +35,17 @@ class SmartSerializer implements SerializerInterface
     {
         if (is_string($data) === true) {
             return $data;
-        } else {
-            $data = json_encode($data, JSON_PRESERVE_ZERO_FRACTION + JSON_INVALID_UTF8_SUBSTITUTE);
-            if ($data === false) {
-                throw new Exceptions\RuntimeException("Failed to JSON encode: ".json_last_error_msg());
-            }
-            if ($data === '[]') {
-                return '{}';
-            } else {
-                return $data;
-            }
         }
+
+        $data = json_encode($data, JSON_PRESERVE_ZERO_FRACTION + JSON_INVALID_UTF8_SUBSTITUTE);
+        if ($data === false) {
+            throw new Exceptions\RuntimeException("Failed to JSON encode: ".json_last_error_msg());
+        }
+        if ($data === '[]') {
+            return '{}';
+        }
+
+        return $data;
     }
 
     /**
@@ -56,14 +56,14 @@ class SmartSerializer implements SerializerInterface
         if (isset($headers['content_type']) === true) {
             if (strpos($headers['content_type'], 'json') !== false) {
                 return $this->decode($data);
-            } else {
-                //Not json, return as string
-                return $data;
             }
-        } else {
-            //No content headers, assume json
-            return $this->decode($data);
+
+            //Not json, return as string
+            return $data;
         }
+
+        //No content headers, assume json
+        return $this->decode($data);
     }
 
     /**
@@ -90,6 +90,7 @@ class SmartSerializer implements SerializerInterface
             }
         }
 
+        $data = preg_replace('|'.preg_quote('\u', '|').'[0-9a-f]{4}|i', '', $data);
         $result = @json_decode($data, true);
         // Throw exception only if E_NOTICE is on to maintain backwards-compatibility on systems that silently ignore E_NOTICEs.
         if (json_last_error() !== JSON_ERROR_NONE && (error_reporting() & E_NOTICE) === E_NOTICE) {
