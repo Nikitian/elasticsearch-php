@@ -90,7 +90,7 @@ class SmartSerializer implements SerializerInterface
             }
         }
 
-        $data = preg_replace('|'.preg_quote('\u', '|').'[0-9a-f]{4}|i', '', $data);
+        $data = preg_replace('|'.preg_quote('\u', '|').'[1-9a-f][0-9a-f]{3}|i', '', $data);
         $result = @json_decode($data, true);
         // Throw exception only if E_NOTICE is on to maintain backwards-compatibility on systems that silently ignore E_NOTICEs.
         if (json_last_error() !== JSON_ERROR_NONE && (error_reporting() & E_NOTICE) === E_NOTICE) {
